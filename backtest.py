@@ -24,7 +24,7 @@ if isinstance(data.columns, pd.MultiIndex):
 data = data.dropna(subset=['Close', 'High', 'Low', 'Volume'])
 
 print("Calculando indicadores...")
-# Indicadores técnicos mejorados
+# Indicadores técnicos 
 data['RSI'] = ta.momentum.RSIIndicator(close=data['Close'], window=14).rsi()
 
 # VWAP CORREGIDO - Reset diario
@@ -46,7 +46,7 @@ data = pd.concat(vwap_data).sort_index()
 # Indicador adicional: EMA para filtro de tendencia
 data['EMA_50'] = ta.trend.EMAIndicator(close=data['Close'], window=50).ema_indicator()
 
-# Eliminar filas con NaN
+
 data = data.dropna()
 
 print(f"Datos preparados: {len(data)} registros")
@@ -157,21 +157,21 @@ class ImprovedVWAPRSIStrategy(bt.Strategy):
             return
         
         if not self.position:
-            # === LÓGICA DE ENTRADA ===
+        
             
             # Condiciones básicas
             price_below_vwap = current_price < current_vwap
             oversold = current_rsi < self.params.rsi_oversold
             good_volume = current_volume > self.params.min_volume
             
-            # Filtro de tendencia (opcional)
+            # Filtro de tendencia 
             trend_ok = True
             if self.params.use_trend_filter:
                 trend_ok = current_price > current_ema  # Solo comprar en tendencia alcista
             
             # Señal de entrada
             if price_below_vwap and oversold and good_volume and trend_ok:
-                # Calcular tamaño de posición (95% del capital)
+                # Calcular tamaño de posición 
                 size = int(self.broker.getcash() * 0.02 / current_price)
                 if size > 0:
                     self.order = self.buy(size=size)
@@ -179,7 +179,7 @@ class ImprovedVWAPRSIStrategy(bt.Strategy):
                             f'Precio: {current_price:.2f}, VWAP: {current_vwap:.2f}')
         
         else:
-            # === LÓGICA DE SALIDA ===
+            
             
             # Stop Loss
             if current_price <= self.stop_price:
@@ -196,7 +196,7 @@ class ImprovedVWAPRSIStrategy(bt.Strategy):
                 self.order = self.sell()
                 self.log(f'📈 SALIDA TÉCNICA - RSI: {current_rsi:.1f}')
                 
-            # Salida por RSI extremo (independiente de VWAP)
+            # Salida por RSI extremo 
             elif current_rsi > self.params.rsi_extreme:
                 self.order = self.sell()
                 self.log(f'🔴 RSI EXTREMO - RSI: {current_rsi:.1f}')
